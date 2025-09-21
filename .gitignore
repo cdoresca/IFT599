@@ -206,5 +206,5 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-.csv
-.json
+TP1/*.csv
+TP1/*.json
