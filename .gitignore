@@ -208,3 +208,6 @@ __marimo__/
 
 TP1/*.csv
 TP1/*.json
+
+TP2/*.csv
+TP2/*.npz
