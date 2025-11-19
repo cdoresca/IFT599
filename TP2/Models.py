@@ -59,10 +59,10 @@ class IF:
         """
         return self.model.score_samples(data)
     
-class DAE(nn.Module):
+class AE(nn.Module):
 
     def __init__(self, in_feature):
-        super(DAE, self).__init__()
+        super(AE, self).__init__()
     
         self.enc = nn.Sequential(
             nn.Linear(in_feature, 64),
