@@ -18,10 +18,15 @@ def read_ecg() -> np.ndarray:
 
 def evaluate_cluster_interne(data, cluster, name : str):
     print(f"Méthode: {name}")
-    print("Silhouette Score: ", silhouette_score(data, cluster))
-    print("Davies-Bouldin Index: ", davies_bouldin_score(data, cluster))
-    print("Indice de Calinski-Harabasz: ", calinski_harabasz_score(data,cluster))
+    silhouette = silhouette_score(data, cluster)
+    davies = davies_bouldin_score(data, cluster)
+    calinski = calinski_harabasz_score(data,cluster)
+    print("Silhouette Score: ", silhouette)
+    print("Davies-Bouldin Index: ", davies)
+    print("Indice de Calinski-Harabasz: ", calinski)
     print()
+    return [silhouette, davies, calinski]
+
 
 def  evaluate_cluster_externe(true, predict, name):
     print(f"Méthode: {name}")
@@ -37,12 +42,12 @@ def evaluate_anomalie(true, predict, name):
     print("ROC-AUC: ",roc_auc_score(true,predict))
     print()
 
-class Time:
+class Timer:
     def __init__(self):
         self.start = time.time()
     
-    def stop(self):
-        print(f"Temps d'exécution : {time.time() - self.start:.4f} secondes")
+    def stop(self, name:str):
+        print(f"Temps d'exécution {name}: {time.time() - self.start:.4f} secondes")
 
 class Memory:
     def __init__(self):
