@@ -9,10 +9,10 @@ class Trainer:
         if shuffle:
             np.random.shuffle(data)
 
-        self.allData = data[:,:-1]
+       
 
-        df_anomalie = data[data[:, -1] == 1][:, :-1]
-        df_normale  = data[data[:, -1] == 0][:, :-1]
+        df_anomalie = data[data[:, -1] == 1]
+        df_normale  = data[data[:, -1] == 0]
 
         n_norm = df_normale.shape[0]
         n_ano  = df_anomalie.shape[0]
@@ -35,12 +35,27 @@ class Trainer:
         criterion = torch.nn.MSELoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-        X_tensor = torch.tensor(self.train, dtype=torch.float32)
+        X_tensor = torch.tensor(self.train[:,:-1], dtype=torch.float32)
 
         for epoch in range(epochs):
             optimizer.zero_grad()
-            reconstructed = model(X_tensor)
-            loss = criterion(reconstructed, X_tensor)
+            output = model(X_tensor)
+            if isinstance(output, tuple):
+                recon, mu, logvar = output
+
+                # Reconstruction loss
+                recon_loss = torch.nn.functional.mse_loss(recon, X_tensor)
+
+                # KL divergence
+                KL = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+                KL = KL / X_tensor.size(0)
+
+                loss = recon_loss + KL
+
+            else:
+                reconstructed = model(X_tensor)
+                loss = criterion(reconstructed, X_tensor)
+
             loss.backward()
             optimizer.step()
 
@@ -51,10 +66,18 @@ class Trainer:
         elif on == "validation":
             X = self.validation
 
-        X_tensor = torch.tensor(self.test, dtype=torch.float32)
+        X_tensor = torch.tensor(X[:,:-1], dtype=torch.float32)
 
         with torch.no_grad():
-            recon = model(X_tensor)
+            out = model(X_tensor)
+
+            # --- VAE returns a tuple (recon, mu, logvar) ---
+            if isinstance(out, tuple):
+                recon = out[0]      # only use reconstruction for anomaly score
+            else:
+                recon = out 
+
 
         mse = torch.mean((recon - X_tensor)**2, dim=1)
         return mse.numpy()
+    
