@@ -11,7 +11,7 @@ class Cluster:
         self.data = data
     
     def Kmeans(self):
-        k = KMeans(n_clusters=5,random_state=42)
+        k = KMeans(n_clusters=5)
         return k.fit_predict(self.data)
     
     def dbscan(self,ep = 0.5):
@@ -19,7 +19,7 @@ class Cluster:
         return dbscan.fit_predict(self.data)
 
     def SpectralCluster(self):
-        spectral = SpectralClustering(n_clusters=5,affinity='nearest_neighbors',random_state=42)
+        spectral = SpectralClustering(n_clusters=5,affinity='nearest_neighbors')
         return spectral.fit_predict(self.data)
     
 class IF:

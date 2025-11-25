@@ -17,7 +17,7 @@ def read_ecg() -> np.ndarray:
     return data['ecg']
 
 def evaluate_cluster_interne(data, cluster, name : str):
-    print(f"Méthode: {name}")
+    print(f"Méthode interne: {name}")
     silhouette = silhouette_score(data, cluster)
     davies = davies_bouldin_score(data, cluster)
     calinski = calinski_harabasz_score(data,cluster)
@@ -25,13 +25,17 @@ def evaluate_cluster_interne(data, cluster, name : str):
     print("Davies-Bouldin Index: ", davies)
     print("Indice de Calinski-Harabasz: ", calinski)
     print()
-    return [silhouette, davies, calinski]
+    return [('Silhouette Score: ',silhouette), ("Davies-Bouldin Index: ",davies), ("Indice de Calinski-Harabasz: ",calinski)]
 
 
 def  evaluate_cluster_externe(true, predict, name):
-    print(f"Méthode: {name}")
-    print("Adjusted Rand Index: ", adjusted_rand_score(true, predict))
-    print("Information mutuelle normalisée: ",normalized_mutual_info_score(true,predict))
+    rand = adjusted_rand_score(true, predict)
+    info = normalized_mutual_info_score(true,predict)
+    print(f"Méthode externe: {name}")
+    print("Indice de Rand Ajusté: ", rand)
+    print("Information mutuelle normalisée: ",info)
+    print()
+    return [("Indice de Rand Ajusté: ",rand),("Information mutuelle normalisée: ",info)]
 
 def evaluate_anomalie(true, predict, name):
     print(f"Méthode: {name}" )
@@ -47,17 +51,22 @@ class Timer:
         self.start = time.time()
     
     def stop(self, name:str):
-        print(f"Temps d'exécution {name}: {time.time() - self.start:.4f} secondes")
+        duree = time.time() - self.start
+        print(f"Temps d'exécution {name}: {duree:.4f} secondes")
+        print()
+        return (f"Temps d'exécution {name} :",duree)
 
 class Memory:
     def __init__(self):
         tracemalloc.start()
 
-    def stop(self):
+    def stop(self,name:str):
         current, peak = tracemalloc.get_traced_memory()
-        print(f"Mémoire actuelle : {current / 10**6:.2f} MB")
-        print(f"Pic mémoire : {peak / 10**6:.2f} MB")
+        print(f"Mémoire actuelle {name}: {current / 10**6:.2f} MB")
+        print(f"Pic mémoire {name}: {peak / 10**6:.2f} MB")
         tracemalloc.stop()
+        print()
+        return (f"Pic mémoire {name}:",peak / 10**6)
 
 
 def plot_clusters(X : np.ndarray, labels: np.ndarray, title="Clusters"):
@@ -90,3 +99,13 @@ def plot_clusters(X : np.ndarray, labels: np.ndarray, title="Clusters"):
     plt.legend()
     plt.grid(True)
     plt.show()
+
+def moy(a,tab,unite= ''):
+    for i in range(a):
+        value = np.array([])
+        for j in range(i,len(tab),a):
+            name, val = tab[j]
+            value = np.append(value,val)
+
+        print(f' {name} {np.mean(value)} +/- {np.std(value)} {unite}')
+    print()
