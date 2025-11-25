@@ -39,17 +39,27 @@ def  evaluate_cluster_externe(true, predict, name):
 
 def evaluate_anomalie(true, predict, name):
     print(f"Méthode: {name}" )
-    print("Exactitude: ",accuracy_score(true,predict))
-    print("Rappel: ",recall_score(true,predict))
-    print("Précision: ",precision_score(true,predict))
-    print("F1-score: ",f1_score(true,predict))
-    print("ROC-AUC: ",roc_auc_score(true,predict))
+    exactitude =accuracy_score(true,predict)
+    rap = recall_score(true,predict)
+    pre = precision_score(true,predict)
+    f1 = f1_score(true,predict)
+    roc = roc_auc_score(true,predict)
+    print("Exactitude: ",exactitude)
+    print("Rappel: ",rap)
+    print("Précision: ",pre)
+    print("F1-score: ",f1)
+    print("ROC-AUC: ",roc)
     print()
+
+    return [("Exactitude: ",exactitude),("Rappel: ",rap),("Précision: ",pre),("F1-score: ",f1),("ROC-AUC: ",roc)]
 
 class Timer:
     def __init__(self):
         self.start = time.time()
     
+    def begin(self):
+        self.start = time.time()
+
     def stop(self, name:str):
         duree = time.time() - self.start
         print(f"Temps d'exécution {name}: {duree:.4f} secondes")
@@ -58,6 +68,9 @@ class Timer:
 
 class Memory:
     def __init__(self):
+        tracemalloc.start()
+
+    def start(self): 
         tracemalloc.start()
 
     def stop(self,name:str):
@@ -70,14 +83,6 @@ class Memory:
 
 
 def plot_clusters(X : np.ndarray, labels: np.ndarray, title="Clusters"):
-    """
-    Trace un scatter plot 2D des clusters.
-    
-    Parameters:
-    - X : np.array ou pd.DataFrame, les données (n_samples, n_features)
-    - labels : array-like, labels des clusters
-    - title : str, titre du graphique
-    """
     # Réduction à 2D pour visualisation
     pca = PCA(n_components=2)
     X_2d = pca.fit_transform(X)

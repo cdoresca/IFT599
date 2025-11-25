@@ -23,42 +23,27 @@ class Cluster:
         return spectral.fit_predict(self.data)
     
 class IF:
-    def __init__(self, n_estimators=100, random_state=42):
-        """
-        Isolation Forest wrapper.
+    def __init__(self, n_estimators=100):
+       
         
-        n_estimators : nombre d’arbres
-        random_state : graine aléatoire
-        """
         self.model = IsolationForest(
             n_estimators=n_estimators,
             contamination="auto",
-            random_state=random_state
         )
 
     def train(self, data):
-        """
-        Entraîne le modèle.
-        data : array-like (n_samples, n_features)
-        """
+        
         self.model.fit(data)
 
     def predict(self, data):
-        """
-        Retourne les prédictions :
-        1 = anomalie
-        -1 = normal
-        """
+      
         return -self.model.predict(data)
 
     def score(self, data):
-        """
-        Retourne les *anomaly scores* :
-        Plus le score est GRAND → plus c'est NORMAL
-        Pour un score inversé (plus grand = plus anormal), voir plus bas.
-        """
+
         return self.model.score_samples(data)
-    
+
+# copie du code du prof
 class AE(nn.Module):
 
     def __init__(self, in_feature):
