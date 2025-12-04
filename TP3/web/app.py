@@ -59,6 +59,14 @@ def fetch(url: str) -> str | None:
     except requests.RequestException:
         return None
 
+def extract_text(html: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+    return soup.get_text(separator=" ", strip=True)
+
+def search_keyword(G: nx.DiGraph, keyword: str):
+    keyword_lower = keyword.lower()
+    return [n for n, attr in G.nodes(data=True) if 'text' in attr and keyword_lower in attr['text'].lower()]
+
 
 def crawl_and_build_graph(seed_urls, max_pages=MAX_PAGES, max_depth=CRAWL_DEPTH):
     G = nx.DiGraph()
@@ -76,8 +84,9 @@ def crawl_and_build_graph(seed_urls, max_pages=MAX_PAGES, max_depth=CRAWL_DEPTH)
         if html is None:
             continue
 
+        text = extract_text(html)
         outlinks = extract_links(url, html)[:MAX_OUTLINKS_PER_PAGE]
-        G.add_node(url, domain=domain(url))
+        G.add_node(url, domain=domain(url),text=text)
         for l in outlinks:
             G.add_node(l, domain=domain(l))
             G.add_edge(url, l)
@@ -106,16 +115,17 @@ def index():
             return render_template("index.html")
 
         seeds = [s.strip() for s in seeds_raw.splitlines() if s.strip()]
-        query = request.form.get("query", "")
+        G = crawl_and_build_graph(seeds)
+        match = search_keyword(G, query)
         scores = {}
         if critere == "PageRank":
-            G = crawl_and_build_graph(seeds)
+           
             pr = compute_pagerank(G)
-            scores["PageRank"] = sorted(pr.items(), key=lambda x: x[1], reverse=True)[:K]
+            scores["PageRank"] = sorted([(url, pr[url]) for url in match if url in pr], key=lambda x: x[1], reverse=True)[:K]
         elif critere == "HITS-autorite":
-            G = crawl_and_build_graph(seeds)
+           
             hubs, authorities = compute_hits(G)
-            scores["HITS-autorite"] = sorted(authorities.items(), key=lambda x: x[1], reverse=True)[:K]
+            scores["HITS-autorite"] = sorted([(url, pr[url]) for url in match if url in pr], key=lambda x: x[1], reverse=True)[:K]
         results = {"query": query, "scores": scores}
 
     return render_template("index.html", results=results)
